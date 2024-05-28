@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class CubeLogic : MonoBehaviour
 {
-    private int height = 8;
+    [SerializeField] Transform cam;
+    private int height = 6;
+    private int speed = 6;
     private bool OnGround = true;
     Rigidbody2D rb;
 
@@ -14,12 +16,21 @@ public class CubeLogic : MonoBehaviour
     }
     void Update()
     {
+        transform.position += Vector3.right * speed * Time.deltaTime;
+        
         if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Space)) && OnGround)
         {
             rb.AddForce(Vector2.up * height, ForceMode2D.Impulse);
-            rb.AddTorque(16.5f);
+            rb.AddTorque(-22.5f);
             OnGround= false;
         }
+    }
+
+    private void LateUpdate()
+    {
+        Vector2 cube = transform.position;
+        Vector2 new_pos = Vector2.Lerp(cam.position, cube, 0.125f);
+        cam.position = new Vector3(new_pos.x, new_pos.y, -10);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -28,7 +39,7 @@ public class CubeLogic : MonoBehaviour
         if (collision.transform.tag == "Floor")
         {
             OnGround = true;
-            rb.AddForce(Vector2.down, ForceMode2D.Impulse);
+            rb.AddForce(Vector2.down * 2, ForceMode2D.Impulse);
         }
     }
 }
