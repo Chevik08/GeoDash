@@ -23,11 +23,17 @@ public class Circle : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        state= true;
+        if (!collision.CompareTag("Trigger"))
+        {
+            state = true;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        state = false;
+        if (!collision.CompareTag("Trigger"))
+        {
+            state = false;
+        }
     }
 }

@@ -7,6 +7,10 @@ TagManager:
   - Floor
   - Death
   - Save
+  - Trigger
+  - Jumper
+  - Booster
+  - finish
   layers:
   - Default
   - TransparentFX
