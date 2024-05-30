@@ -5,48 +5,37 @@ using UnityEngine;
 
 public class CubeLogic : MonoBehaviour
 {
-    [SerializeField] Transform cam;
+    [SerializeField] private Transform cam;
     [SerializeField] private GameObject left_up;
     [SerializeField] private GameObject right_up;
     [SerializeField] private GameObject left_down;
     [SerializeField] private GameObject right_down;
-    private float force = 20f;
-    private float speed = 8f;
+
+    private PhysicsMaterial2D noFrick;
+    private Rigidbody2D rb;
+
+    private float cube_y;
+    private float cube_x;
+    private float lastJump = 0f;
+    private int count = 0;
+
+    private bool isJumping = false;
     private bool OnGround = true;
     private bool OnTouch = true;
-    private PhysicsMaterial2D noFrick;
-    private float rotation = 0;
-    private Quaternion trotation;
-    float gravity;
-    Rigidbody2D rb;
-    BoxCollider2D coll;
-    float lastJump = 0f;
-    readonly float jumpDown = 0.3f;
-    readonly float jumpHeight = 2.5f;
-    readonly float jumpDistance = 3.5f;
-    bool isJumping = false;
-    bool predJump = false;
-    float height = 0;
-    float down = 0;
-    float cube_y;
-    float cube_x;
-    int count = 0;
+
+    private readonly float speed = 8f;
+    private readonly float force = 20f;
+    private readonly float jumpDown = 0.3f;
+    private readonly float jumpHeight = 2.5f;
+    private readonly float jumpDistance = 3.5f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<BoxCollider2D>();
         noFrick = new();
         noFrick.friction = 0;
         noFrick.bounciness= 0;
         rb.sharedMaterial= noFrick;
-        rotation = rb.rotation;
-        trotation = transform.rotation;
-        gravity = rb.gravityScale;
-
-        //Quaternion rot = transform.rotation;
-        //rot.z = 0;
-        //transform.rotation = rot;
         rb.velocity = Vector2.zero;
     }
 
@@ -114,7 +103,6 @@ public class CubeLogic : MonoBehaviour
         // Если не на земле, но после прыжка
         if (!OnGround && isJumping) 
         {
-            height = transform.position.y;
             // Ставим потолок прыжка
             if (transform.position.y >= cube_y + jumpHeight)
             {
@@ -141,7 +129,6 @@ public class CubeLogic : MonoBehaviour
         if (OnGround && OnTouch)
         {
             isJumping= false;
-
         }
         // Если с чем угодно соприкосновение
         if (OnTouch)
