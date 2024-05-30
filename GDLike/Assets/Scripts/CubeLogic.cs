@@ -22,6 +22,7 @@ public class CubeLogic : MonoBehaviour
     private bool isJumping = false;
     private bool OnGround = true;
     private bool OnTouch = true;
+    private bool isFalling = false;
 
     private readonly float speed = 8f;
     private readonly float force = 20f;
@@ -37,29 +38,15 @@ public class CubeLogic : MonoBehaviour
             friction = 0,
             bounciness = 0
         };
+
+        rb.gravityScale = 8;
         rb.sharedMaterial= noFrick;
         rb.velocity = Vector2.zero;
     }
 
     bool ColliderCheck()
     {
-        if (left_down.GetComponent<Circle>().GetState() && right_down.GetComponent<Circle>().GetState())
-        {
-            return true;
-        }
-        else if (left_down.GetComponent<Circle>().GetState() && left_up.GetComponent<Circle>().GetState())
-        {
-            return true;
-        }
-        else if (left_up.GetComponent<Circle>().GetState() && right_up.GetComponent<Circle>().GetState())
-        {
-            return true;
-        }
-        else if (right_up.GetComponent<Circle>().GetState() && right_down.GetComponent<Circle>().GetState())
-        {
-            return true;
-        }
-        else if (left_down.GetComponent<Circle>().GetState())
+        if (left_down.GetComponent<Circle>().GetState())
         {
             return true;
         }
@@ -98,12 +85,13 @@ public class CubeLogic : MonoBehaviour
             // Прикладываем вектор силы вертикально вверх
             rb.velocity = Vector2.up * force;
             // Счётчик кадров вращения
+            Debug.Log($"Count: {count}");
             count = 0;
             lastJump = Time.time;
             OnGround = false;
         }
         // Если не на земле, но после прыжка
-        if (!OnGround && isJumping) 
+        if (!OnGround && isJumping && !isFalling) 
         {
             // Ставим потолок прыжка
             if (transform.position.y >= cube_y + jumpHeight)
@@ -111,11 +99,20 @@ public class CubeLogic : MonoBehaviour
                 transform.position = new Vector2(transform.position.x, cube_y + jumpHeight);
             }
             // Ставим мягкое ограничение на длину прыжка
-            if (transform.position.x - cube_x + jumpDistance <= 0.5)
+            if (transform.position.x > cube_x + jumpDistance)
             {
                 transform.position = new Vector2(cube_x + jumpDistance, transform.position.y);
             }
-            rb.gravityScale = 8;
+            // Если падаем
+            if (transform.position.x >= cube_x + jumpDistance && transform.position.y < cube_y)
+            {
+                isFalling = true;
+            }
+        }
+        // Если летим вниз
+        if (isFalling)
+        {
+            transform.Rotate(Vector3.back, 180f / 20);
         }
         // Если не на земле, но после прыжка
         if (!OnGround && !OnTouch && isJumping)
@@ -131,6 +128,7 @@ public class CubeLogic : MonoBehaviour
         if (OnGround && OnTouch)
         {
             isJumping= false;
+            isFalling = false;
         }
         // Если с чем угодно соприкосновение
         if (OnTouch)
@@ -138,16 +136,8 @@ public class CubeLogic : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
-    {
-        Vector2 cube = transform.position;
-        Vector2 new_pos = Vector2.Lerp(cam.position, cube, 1f);
-        cam.position = new Vector3(new_pos.x, cube.y, -10);
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log(collision.gameObject.name);
         OnTouch = true;
     }
 
