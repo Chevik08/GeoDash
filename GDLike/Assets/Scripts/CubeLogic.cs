@@ -136,7 +136,7 @@ public class CubeLogic : MonoBehaviour
         // Если точно на земле
         if (OnGround && OnTouch)
         {
-            rb.AddForce(Vector3.down, ForceMode2D.Force);
+            rb.AddForce(Vector3.down * 2f, ForceMode2D.Force);
             isJumping= false;
             isFalling = false;
         }
@@ -149,7 +149,7 @@ public class CubeLogic : MonoBehaviour
     // Функция довращения кубика
     private void DoRotate()
     {
-
+        // FIXME: Когда-нибудь
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -180,20 +180,33 @@ public class CubeLogic : MonoBehaviour
         }
         if (collision.gameObject.CompareTag("Booster"))
         {
-            StartCoroutine(CoolDown());
+            StartCoroutine(CoolDown(1, 3));
             speed += 3f;
+        }
+        if (collision.gameObject.CompareTag("Reverse"))
+        {
+            StartCoroutine(Reverse(collision, 0.5f));
         }
         if (collision.gameObject.CompareTag("finish"))
         {
             Debug.Log("WIN");
+            speed = -speed;
             myEvent.Invoke();
         }
     }
 
-    private IEnumerator CoolDown()
+    private IEnumerator CoolDown(float time, float minus)
     {
-        yield return new WaitForSeconds(1);
-        speed -= 3f;
+        yield return new WaitForSeconds(time);
+        speed -= minus;
+
+    }
+
+    private IEnumerator Reverse(Collider2D collision, float time)
+    {
+        yield return new WaitForSeconds(time);
+        collision.gameObject.SetActive(false);
+        speed = -speed;
 
     }
 }
