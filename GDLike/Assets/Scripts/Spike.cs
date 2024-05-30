@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class test : MonoBehaviour
 {
-    void OnCollisionEnter(Collision collision)
+    private void Awake()
     {
-        Debug.Log("TOOOOOOOOOOOOOOUCH");
+        //GetComponent<SpriteRenderer>().
     }
 }

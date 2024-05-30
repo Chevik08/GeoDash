@@ -23,7 +23,7 @@ public class CubeLogic : MonoBehaviour
     float lastJump = 0f;
     readonly float jumpDown = 0.3f;
     readonly float jumpHeight = 2.5f;
-    readonly float jumpDistance = 3f;
+    readonly float jumpDistance = 3.5f;
     bool isJumping = false;
     bool predJump = false;
     float height = 0;
@@ -96,50 +96,56 @@ public class CubeLogic : MonoBehaviour
         Vector2 vel = rb.velocity;
         vel.x = speed;
         rb.velocity = vel;
-
+        
+        // Нажатие пробела, если игрок на земле и кулдаун прыжка не истёк
         if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Space)) && OnGround && (Time.time - lastJump) > jumpDown)
         {
             isJumping = true;
-            //rb.velocity = Vector2.zero;
+            // Смотрим, откуда совершается прыжок
             cube_y = transform.position.y;
             cube_x = transform.position.x;
+            // Прикладываем вектор силы вертикально вверх
             rb.velocity = Vector2.up * force;
+            // Счётчик кадров вращения
             count = 0;
             lastJump = Time.time;
             OnGround = false;
         }
+        // Если не на земле, но после прыжка
         if (!OnGround && isJumping) 
         {
             height = transform.position.y;
+            // Ставим потолок прыжка
             if (transform.position.y >= cube_y + jumpHeight)
             {
                 transform.position = new Vector2(transform.position.x, cube_y + jumpHeight);
             }
-            if (transform.position.x >= cube_x + jumpDistance)
+            // Ставим мягкое ограничение на длину прыжка
+            if (transform.position.x - cube_x + jumpDistance <= 0.5)
             {
                 transform.position = new Vector2(cube_x + jumpDistance, transform.position.y);
             }
             rb.gravityScale = 8;
         }
+        // Если не на земле, но после прыжка
         if (!OnGround && !OnTouch && isJumping)
         {
             count++;
+            // Если мы прыгаем менее, чем на 20 кадров, то вращение контролируемое
             if (count <= 20)
             {
                 transform.Rotate(Vector3.back, 180f / 20);
             }
         }
+        // Если точно на земле
         if (OnGround && OnTouch)
         {
             isJumping= false;
-            //down = transform.position.y;
-            rotation = rb.rotation;
 
         }
+        // Если с чем угодно соприкосновение
         if (OnTouch)
         {
-            //rb.rotation = rotation;
-            //isJumping = false;
         }
     }
 
