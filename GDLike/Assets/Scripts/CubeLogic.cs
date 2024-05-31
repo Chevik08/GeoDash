@@ -4,6 +4,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Класс управления кубиком
+/// </summary>
 public class CubeLogic : MonoBehaviour
 {
     [SerializeField] private GameObject left_up;
@@ -29,7 +32,6 @@ public class CubeLogic : MonoBehaviour
     private bool OnGround = true;
     private bool OnTouch = true;
     private bool isFalling = false;
-    private bool control = false;
     private bool isPaused = false;
 
     private readonly float force = 20f;
@@ -52,11 +54,10 @@ public class CubeLogic : MonoBehaviour
         lastDeath = Time.time;
     }
 
-    public void Control(bool mode)
-    {
-        control = mode;
-    }
-
+    /// <summary>
+    /// Метод проверки соприкосновения с коллайдерами
+    /// </summary>
+    /// <returns> Есть соприкосновение или нет </returns>
     bool ColliderCheck()
     {
         if (left_down.GetComponent<Circle>().GetState())
@@ -81,6 +82,10 @@ public class CubeLogic : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Метод прыжка
+    /// </summary>
+    /// <param name="force"> Сила прыжка </param>
     private void Jump(float force)
     {
         isJumping = true;
@@ -95,11 +100,17 @@ public class CubeLogic : MonoBehaviour
         OnGround = false;
     }
 
+    /// <summary>
+    /// Метод возобновления процесса игры извне
+    /// </summary>
     public void ForceContinue()
     {
         isPaused= false;
     }
 
+    /// <summary>
+    /// Метод отслеживания клавиш
+    /// </summary>
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -117,9 +128,11 @@ public class CubeLogic : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Метод обработки физики и движения
+    /// </summary>
     void FixedUpdate()
     {
-
         OnGround = ColliderCheck();
         Vector2 vel = rb.velocity;
         vel.x = speed;
@@ -181,12 +194,18 @@ public class CubeLogic : MonoBehaviour
         }
     }
 
-    // Функция довращения кубика
+    /// <summary>
+    /// Метод довращения кубика при его приземлении на уголок
+    /// </summary>
     private void DoRotate()
     {
         // FIXME: Когда-нибудь
     }
 
+    /// <summary>
+    /// Метод детекции соприкосновения игрока и пола
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Floor"))
@@ -195,6 +214,10 @@ public class CubeLogic : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Метод детекции соприкосновения игрока и пола
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Floor"))
@@ -203,8 +226,13 @@ public class CubeLogic : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Метод обработки триггеров
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // Если триггер смерти
         if (collision.gameObject.CompareTag("Death"))
         {
             if (Time.time - lastDeath > 0.1)
@@ -213,39 +241,52 @@ public class CubeLogic : MonoBehaviour
                 myEvent.Invoke();
             }
         }
+        // Если триггер удвоенного прыжка
         if (collision.gameObject.CompareTag("Jumper"))
         {
             Jump(force * 2f);
         }
+        // Если триггер ускорения
         if (collision.gameObject.CompareTag("Booster"))
         {
             StartCoroutine(CoolDown(1, 3));
             speed += 3f;
         }
+        // Если триггер изменения направления движения
         if (collision.gameObject.CompareTag("Reverse"))
         {
             StartCoroutine(Reverse(collision, 0.5f));
         }
+        // Если триггер окончания игры
         if (collision.gameObject.CompareTag("finish"))
         {
-            Debug.Log("WIN");
             speed = 8f;
             myEvent.Invoke();
         }
     }
 
-    private IEnumerator CoolDown(float time, float minus)
+    /// <summary>
+    /// Метод ускорения на заданный промежуток времени
+    /// </summary>
+    /// <param name="time"> Время ускорения в секундах </param>
+    /// <param name="new_speed"> Новая скорость после ускорения </param>
+    /// <returns></returns>
+    private IEnumerator CoolDown(float time, float new_speed)
     {
         yield return new WaitForSeconds(time);
-        speed -= minus;
+        speed -= new_speed;
 
     }
 
+    /// <summary>
+    /// Метод инвератации горизонтального движения
+    /// </summary>
+    /// <param name="collision"> Триггер для изменения напрваления </param>
+    /// <param name="time"> Через какое время изменение будет применено </param>
+    /// <returns></returns>
     private IEnumerator Reverse(Collider2D collision, float time)
     {
         yield return new WaitForSeconds(time);
-        //collision.gameObject.SetActive(false);
         speed = -speed;
-
     }
 }
