@@ -46,6 +46,7 @@ public class Camera : MonoBehaviour
     {
         while (Vector2.Distance(cubeObj.transform.position, cam.position) > 0.5)
         {
+            if (!work) { break; }
             Vector2 new_pos = Vector2.Lerp(cam.position, cubeObj.transform.position, 0.05f);
             cam.position = new Vector3(new_pos.x, new_pos.y, -10);
             yield return null;
@@ -54,6 +55,9 @@ public class Camera : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        work = true;
+        if (collision.CompareTag("Player"))
+        {
+            work = true;
+        }
     }
 }

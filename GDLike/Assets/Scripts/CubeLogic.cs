@@ -6,12 +6,12 @@ using UnityEngine.Events;
 
 public class CubeLogic : MonoBehaviour
 {
-    [SerializeField] private Transform cam;
     [SerializeField] private GameObject left_up;
     [SerializeField] private GameObject right_up;
     [SerializeField] private GameObject left_down;
     [SerializeField] private GameObject right_down;
     public UnityEvent myEvent;
+    public UnityEvent camEvent;
 
     private PhysicsMaterial2D noFrick;
     private Rigidbody2D rb;
@@ -39,11 +39,11 @@ public class CubeLogic : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         noFrick = new()
         {
-            friction = 0,
-            bounciness = 0
+            friction = 0f,
+            bounciness = 0f
         };
 
-        rb.gravityScale = 8;
+        rb.gravityScale = 8f;
         rb.sharedMaterial= noFrick;
         rb.velocity = Vector2.zero;
     }
@@ -136,13 +136,18 @@ public class CubeLogic : MonoBehaviour
         // Если точно на земле
         if (OnGround && OnTouch)
         {
-            rb.AddForce(Vector3.down * 2f, ForceMode2D.Force);
+            //rb.AddForce(Vector3.down * 2f, ForceMode2D.Force);
             isJumping= false;
             isFalling = false;
         }
         // Если с чем угодно соприкосновение
         if (OnTouch)
         {
+        }
+        if (transform.position.y < -24 | transform.position.x > 312 | transform.position.x < -20)
+        {
+            camEvent.Invoke();
+            myEvent.Invoke();
         }
     }
 
@@ -190,7 +195,7 @@ public class CubeLogic : MonoBehaviour
         if (collision.gameObject.CompareTag("finish"))
         {
             Debug.Log("WIN");
-            speed = -speed;
+            speed = 8f;
             myEvent.Invoke();
         }
     }
