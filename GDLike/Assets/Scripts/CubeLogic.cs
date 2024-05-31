@@ -12,6 +12,8 @@ public class CubeLogic : MonoBehaviour
     [SerializeField] private GameObject right_down;
     public UnityEvent myEvent;
     public UnityEvent camEvent;
+    public UnityEvent pauseEvent;
+    public UnityEvent continueEvent;
 
     private PhysicsMaterial2D noFrick;
     private Rigidbody2D rb;
@@ -21,13 +23,14 @@ public class CubeLogic : MonoBehaviour
     private float lastJump = 0f;
     private int count = 0;
     private float speed = 8f;
+    private float lastDeath = 0f;
 
     private bool isJumping = false;
     private bool OnGround = true;
     private bool OnTouch = true;
     private bool isFalling = false;
     private bool control = false;
-    private bool imDead = false;
+    private bool isPaused = false;
 
     private readonly float force = 20f;
     private readonly float jumpDown = 0.3f;
@@ -46,6 +49,7 @@ public class CubeLogic : MonoBehaviour
         rb.gravityScale = 8f;
         rb.sharedMaterial= noFrick;
         rb.velocity = Vector2.zero;
+        lastDeath = Time.time;
     }
 
     public void Control(bool mode)
@@ -91,6 +95,28 @@ public class CubeLogic : MonoBehaviour
         OnGround = false;
     }
 
+    public void ForceContinue()
+    {
+        isPaused= false;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isPaused)
+            {
+                continueEvent.Invoke();
+                isPaused = false;
+            }
+            else
+            {
+                pauseEvent.Invoke();
+                isPaused= true;
+            }
+        }
+    }
+
     void FixedUpdate()
     {
 
@@ -101,6 +127,10 @@ public class CubeLogic : MonoBehaviour
 
         // Нажатие пробела, если игрок на земле и кулдаун прыжка не истёк
         if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Space)) && OnGround && (Time.time - lastJump) > jumpDown)
+        {
+            Jump(force);
+        }
+        if ((Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKey(KeyCode.Mouse0)) && OnGround && (Time.time - lastJump) > jumpDown)
         {
             Jump(force);
         }
@@ -177,7 +207,11 @@ public class CubeLogic : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Death"))
         {
-            myEvent.Invoke();
+            if (Time.time - lastDeath > 0.1)
+            {
+                lastDeath = Time.time;
+                myEvent.Invoke();
+            }
         }
         if (collision.gameObject.CompareTag("Jumper"))
         {
@@ -210,7 +244,7 @@ public class CubeLogic : MonoBehaviour
     private IEnumerator Reverse(Collider2D collision, float time)
     {
         yield return new WaitForSeconds(time);
-        collision.gameObject.SetActive(false);
+        //collision.gameObject.SetActive(false);
         speed = -speed;
 
     }
